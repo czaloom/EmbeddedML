@@ -1,4 +1,4 @@
-/* EMBEDDEDML V1.0 */
+/* EMBEDDEDML V1.1 */
 /*
     embeddedML.c - Embedded Machine Learning Library
     Copyright (C) 2018  Charles Zaloom
@@ -406,7 +406,7 @@ float relu(float x){
 //Similar to Tanh
 float relu2(float x){
     if(x < -1.0) return 0.1*x-0.9;
-    else if(x > 1.0) return 0.9+x*0.9;
+    else if(x > 1.0) return 0.1*x+0.9;
     return x;
 }
 
