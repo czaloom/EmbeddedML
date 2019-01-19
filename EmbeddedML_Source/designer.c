@@ -1,4 +1,4 @@
-/* EMBEDDEDML V1.0 */
+/* EMBEDDEDML V1.2 */
 /*
     designer.c - Tools for quicker development in EmbeddedML 
     Copyright (C) 2018 Charles Zaloom
@@ -110,7 +110,7 @@ int generate_softmax(int argc, const char * argv[]){
 
     printf("NOTE: The softmax function generator uses the first number used in calling the designer program as the input size.\n\n");
 
-    printf("float weak_softmax(float *x, float *y){\n");
+    printf("float strong_softmax(float *x, float *y){\n");
     printf("  //For use with systems that have low-precision floating point number storage.\n");
     printf("  NOTE: If the input values are within -1.0 to 1.0 change the multiplier to a multiple of 10.\n\n");
     printf("  float multiplier = 1.0;\n");
@@ -174,7 +174,7 @@ int generate_model(int argc, const char * argv[]){
 				    if(i+1 != n_layers) printf(",");
 				}
 				printf("};\n");
-				printf("float run_error[%s];\n", argv[n_layers]);
+				printf("float output[%s];\n", argv[n_layers]);
 
 				printf("\nANN net;\n");
 				printf("net.weights = weights;\n");
@@ -232,7 +232,7 @@ int generate_model(int argc, const char * argv[]){
 				printf("net.output_activation_function = &relu;\n");
 				printf("net.hidden_activation_function = &relu;\n");
 
-				printf("\ninit_ann(&net);\n");
+				printf("\ninit_embedded_ann(&net);\n");
 				printf("float x[%s];\n", argv[1]);
 				printf("float y[%s];\n", argv[n_layers]);
 				printf("//---------------------\n");
@@ -243,16 +243,17 @@ int generate_model(int argc, const char * argv[]){
 			    printf("float dedw[%d];\n", n_weights);
 			    printf("float bias[%d];\n", n_bias);
 			    printf("unsigned int topology[%d];\n", n_layers);
-			    printf("float y[%s];\n", argv[n_layers]);
+			    printf("float run_error[%s];\n", argv[n_layers]);
 
 			    printf("\nANN net;\n");
 			    printf("net.weights = weights;\n");
 			    printf("net.dedw = dedw;\n");
 			    printf("net.bias = bias;\n");
 			    printf("net.topology = topology;\n");
-			    printf("net.output = y;\n");
+			    printf("net.output = run_error;\n");
 			    printf("load_ann(&net, <Filename>);\n");
 			    printf("float x[%d];\n", atoi(argv[1]));
+			    printf("float y[%s];\n", argv[n_layers]);
 			    printf("//-------------\n");
 	    		break;
 			default:
@@ -281,7 +282,7 @@ int main(int argc, const char * argv[]) {
 		int loop = 1;
 		while(loop == 1){
 			int i;
-		    const char *a[4] = {"Create/Load ANN", "Weight Generator", "Weak_Softmax Generator"};
+		    const char *a[4] = {"Create/Load ANN", "Weight Generator", "Strong_Softmax Generator"};
 		    printf("Tools:\n");
 
 		    int tools = 3;
