@@ -19,7 +19,7 @@ Changelog:
 
 		Addition: 'init_embedded_ann' --> Allows for a loaded ANN's bias and weights to not be modified.
 
-		Optimization: Cut out excess looping in backprop and forwardprop. 
+		Optimization: Cut out excess code in backprop and forwardprop. 
 
 	DESIGNER:
 		Change: 'Load ANN' option now uses the 'init_loaded_ann' function
