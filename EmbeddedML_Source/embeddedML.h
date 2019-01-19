@@ -1,4 +1,4 @@
-/* EMBEDDEDML V1.0 */
+/* EMBEDDEDML V1.2 */
 /*
     embeddedML.h - Embedded Machine Learning Library
     Copyright (C) 2018  Charles Zaloom
@@ -20,7 +20,9 @@
 #ifndef EMBEDDED_ML
 #define EMBEDDED_ML
 
-//#define _EMBEDDED_
+//#ifndef _EMBEDDED_
+//	#define _EMBEDDED_
+//#endif
 
 /*
  * NOTE: Defining _EMBEDDED_ removes all dependencies on standard libraries. 
@@ -58,6 +60,7 @@ typedef struct {
 void train_ann(ANN *net, float *input, float *output);
 void run_ann(ANN *net, float *input);
 void init_ann(ANN *net);
+void init_embedded_ann(ANN *net);
 #ifndef _EMBEDDED_
     void load_ann(ANN *net, const char *filename);   
     void save_ann(ANN *net, const char *filename);
@@ -66,6 +69,7 @@ void init_ann(ANN *net);
 //-----Utility-----
 void fill_zeros(float *v, unsigned int size);
 void fill_number(float *v, unsigned int size, float number);
+void strong_softmax(float *x, float *y);
 void weak_softmax(float *x, float *y);
 #ifndef _EMBEDDED_
     void fill_rand(float *v, unsigned int size, float lower, float upper);
