@@ -1,0 +1,30 @@
+ /*
+ * changelog.txt
+ *
+ * EmbeddedML
+ * v1.2
+ *
+ * Embedded Machine Learning
+ * Created by Charles Zaloom on 5/27/18.
+ *
+ */
+
+Changelog:
+	CORE:
+		Fixed: Mistake in RELU2 definition
+		
+		Change: Renamed 'weak_softmax' to 'strong_softmax'
+		Change: RELU now begins decreasing at 1.03 rather than 1.1
+		Change: 'ANN.output' now returns network output rather than error. Allows for user to define error calculation.
+
+		Addition: 'init_embedded_ann' --> Allows for a loaded ANN's bias and weights to not be modified.
+
+		Optimization: Cut out excess looping in backprop and forwardprop. 
+
+	DESIGNER:
+		Change: 'Load ANN' option now uses the 'init_loaded_ann' function
+		Change: 'Load ANN' option now declares "output" to replace "y" array
+
+Notes:
+
+Issues:
