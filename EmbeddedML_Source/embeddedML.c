@@ -1,4 +1,4 @@
-/* EMBEDDEDML V1.1 */
+/* EMBEDDEDML V1.2 */
 /*
     embeddedML.c - Embedded Machine Learning Library
     Copyright (C) 2018  Charles Zaloom
@@ -20,102 +20,79 @@
 #include "embeddedML.h"
 
 //-----ANN-----
-void BP_ANN(ANN *net, float *input, float *output, float *weights, float *velocity, float *bias, float *delta, unsigned int *_delta, int depth){
-    unsigned int i,j,k;
-    unsigned int _currW[2] = {net->topology[net->n_layers - depth], net->topology[net->n_layers - depth - 1]};
-    unsigned int _X[2] = {net->topology[net->n_layers - depth - 1],1};
+void BP_ANN(ANN *net, float *input, float *output, float *weights, float *velocity, float *bias, float *delta, int depth){
+    unsigned int i,j;
+    unsigned int DIM[2] = {net->topology[net->n_layers - depth], net->topology[net->n_layers - depth - 1]};
 
-    float a[net->topology[net->n_layers - depth]];
-    float d[net->topology[net->n_layers - depth]];
-    
-    for(i = 0; i < _currW[0]; i++){
-        for(j = 0; j < _X[1]; j++){
-            a[(_X[1]*i)+j] = 0.0;
-            for(k = 0; k < _currW[1]; k++){
-                a[(_X[1]*i)+j] += weights[(_currW[1]*i)+k]*input[(_X[1]*k)+j];
-            }
-        }
-    }
-
-    unsigned int _X_T[2] = {1,net->topology[net->n_layers - depth - 1]};
     if(depth == 1){
-        for(i = 0; i < net->topology[net->n_layers - depth]; i++){
-            a[i] += bias[i];
-            d[i] = net->output_activation_derivative(a[i]);
-            a[i] = net->output_activation_function(a[i]);
+        for(i = 0; i < DIM[0]; i++){
+            net->output[i] = 0.0;
+            for(j = 0; j < DIM[1]; j++){
+                net->output[i] += weights[(DIM[1]*i)+j]*input[j];
+            }
+            net->output[i] = net->output[i] + bias[i];
+            delta[i] = (output[i]-net->output_activation_function(net->output[i])) * net->output_activation_derivative(net->output[i]);
+            net->output[i] = net->output_activation_function(net->output[i]);
+            bias[i] = bias[i] + delta[i]*0.1;
         }
 
-        for(i = 0; i < net->topology[net->n_layers-1]; i++){
-            net->output[i] = (output[i] - a[i]);
-            delta[i] = net->output[i] * d[i];
-        }
-
-        float dEdW[_currW[0]*_currW[1]];
-        for(i = 0; i < _delta[0]; i++){
-            for(j = 0; j < _X_T[1]; j++){
-                dEdW[(_X_T[1]*i)+j] = 0.0;
-                for(k = 0; k < _delta[1]; k++){
-                    dEdW[(_X_T[1]*i)+j] += delta[(_delta[1]*i)+k]*input[(_X_T[1]*k)+j];
-                }
+        float dEdW[DIM[0]*DIM[1]];
+        for(i = 0; i < DIM[0]; i++){
+            for(j = 0; j < DIM[1]; j++){
+                dEdW[(DIM[1]*i)+j] = delta[i]*input[j];
             }
         }
-        for(i = 0; i < _currW[0]; i++){
-            bias[i] = bias[i] + delta[i]*0.1; 
-        }
-        for(i = 0; i < _currW[0]*_currW[1]; i++){
+        for(i = 0; i < DIM[0]*DIM[1]; i++){
             velocity[i] = dEdW[i]*net->eta - velocity[i]*net->alpha;
             weights[i] = weights[i] + velocity[i];
         }
         return;
     }
     else{
-        for(i = 0; i < net->topology[net->n_layers - depth]; i++){
+        float a[DIM[0]];
+        float d[DIM[0]];
+
+        for(i = 0; i < DIM[0]; i++){
+            a[i] = 0.0;
+            for(j = 0; j < DIM[1]; j++){
+                a[i] += weights[(DIM[1]*i)+j]*input[j];
+            }
             a[i] += bias[i];
             d[i] = net->hidden_activation_derivative(a[i]);
             a[i] = net->hidden_activation_function(a[i]);
         }
 
-        unsigned int _nextW_T[2] = {net->topology[net->n_layers - depth], net->topology[net->n_layers - depth + 1]};
-        unsigned int _nextW[2] = {net->topology[net->n_layers - depth + 1], net->topology[net->n_layers - depth]};
-        unsigned int _prevDelta[2] = {net->topology[net->n_layers - depth + 1], 1};
-        
-        float prev_delta[net->topology[net->n_layers - depth + 1]];
-        unsigned int weight_iter = net->topology[net->n_layers - depth] * net->topology[net->n_layers - depth - 1];
-        unsigned int bias_iter = net->topology[net->n_layers - depth];
-       
-        float next_weights_T[_nextW_T[0]*_nextW_T[1]];
+        unsigned int DIM1 = net->topology[net->n_layers - depth + 1];
+
+        float prev_delta[DIM1];
+        unsigned int weight_iter = DIM[0] * DIM[1];
+
+        float next_weights_T[DIM[0]*DIM1];
         unsigned int iter = 0;
-        for(i = 0; i < _nextW[1]; i++){
-            for(j = 0; j < _nextW[0]; j++){
-                next_weights_T[iter] = weights[(_nextW[1]*j)+i+weight_iter];
+        for(i = 0; i < DIM[0]; i++){
+            for(j = 0; j < DIM1; j++){
+                next_weights_T[iter] = weights[(DIM[0]*j)+i+weight_iter];
                 iter++;
             }
         }
-    
-        BP_ANN(net, a, output, &weights[weight_iter], &velocity[weight_iter], &bias[bias_iter], prev_delta, _prevDelta, depth-1);
-        
-        for(i = 0; i < _nextW_T[0]; i++){
-            for(j = 0; j < _prevDelta[1]; j++){
-                delta[(_prevDelta[1]*i)+j] = 0;
-                for(k = 0; k < _nextW_T[1]; k++){
-                    delta[(_prevDelta[1]*i)+j] += next_weights_T[(_nextW_T[1]*i)+k]*prev_delta[(_prevDelta[1]*k)+j];
-                }
-                delta[(_prevDelta[1]*i)+j] = delta[(_prevDelta[1]*i)+j]*d[(_prevDelta[1]*i)+j];
+
+        BP_ANN(net, a, output, &weights[weight_iter], &velocity[weight_iter], &bias[DIM[0]], prev_delta, depth-1);
+
+        for(i = 0; i < DIM[0]; i++){
+            delta[i] = 0;
+            for(j = 0; j < DIM1; j++){
+                delta[i] += next_weights_T[(DIM1*i)+j]*prev_delta[j];
+            }
+            delta[i] = delta[i]*d[i];
+            bias[i] = bias[i] + delta[i]*0.1;
+        }
+        float dEdW[DIM[0]*DIM[1]];
+        for(i = 0; i < DIM[0]; i++){
+            for(j = 0; j < DIM[1]; j++){
+                dEdW[(DIM[1]*i)+j] = delta[i]*input[j];
             }
         }
-        float dEdW[_currW[0]*_currW[1]];
-        for(i = 0; i < _delta[0]; i++){
-            for(j = 0; j < _X_T[1]; j++){
-                dEdW[(_X_T[1]*i)+j] = 0.0;
-                for(k = 0; k < _delta[1]; k++){
-                    dEdW[(_X_T[1]*i)+j] += delta[(_delta[1]*i)+k]*input[(_X_T[1]*k)+j];
-                }
-            }
-        }
-        for(i = 0; i < _currW[0]; i++){
-            bias[i] = bias[i] + delta[i]*0.1; 
-        }
-        for(i = 0; i < _currW[0]*_currW[1]; i++){
+        for(i = 0; i < DIM[0]*DIM[1]; i++){
             velocity[i] = dEdW[i]*net->eta - velocity[i]*net->alpha;
             weights[i] = weights[i] + velocity[i];
         }
@@ -125,43 +102,33 @@ void BP_ANN(ANN *net, float *input, float *output, float *weights, float *veloci
 
 void train_ann(ANN *net, float *input, float *output){
     float delta[net->topology[1]];
-    unsigned int delta_dimensions[2] = {net->topology[1],1};
-    BP_ANN(net, input, output, net->weights, net->dedw, net->bias, delta, delta_dimensions, net->n_layers-1);
+    BP_ANN(net, input, output, net->weights, net->dedw, net->bias, delta, net->n_layers-1);
 }
 
 void FP_ANN(ANN *net, float *input, unsigned int depth, float *weights){
-    unsigned int _currW[2] = {net->topology[net->n_layers - depth], net->topology[net->n_layers - depth - 1]};
-    unsigned int _X[2] = {net->topology[net->n_layers - depth - 1],1};
-    
+    unsigned int DIM[2] = {net->topology[net->n_layers - depth], net->topology[net->n_layers - depth - 1]};
     unsigned int i,j,k;
-    float a[net->topology[net->n_layers - depth]];
-    for(i = 0; i < _currW[0]; i++){
-        for(j = 0; j < _X[1]; j++){
-            a[(_X[1]*i)+j] = 0.0;
-            for(k = 0; k < _currW[1]; k++){
-                a[(_X[1]*i)+j] += weights[(_currW[1]*i)+k]*input[(_X[1]*k)+j];
-            }
-        }
-    }
-    
-    if(depth == 1){
-        for(i = 0; i < net->topology[net->n_layers - depth]; i++){
-            a[i] += net->bias[i];
-            a[i] = net->output_activation_function(a[i]);
-        }
 
-        for(i = 0; i < net->topology[net->n_layers-1]; i++){
-            net->output[i] = a[i];
+    if(depth == 1){
+        for(i = 0; i < DIM[0]; i++){
+            net->output[i] = 0.0;
+            for(k = 0; k < DIM[1]; k++){
+                net->output[i] += weights[(DIM[1]*i)+k]*input[k];
+            }
+            net->output[i] = net->output_activation_function(net->output[i] + net->bias[i]);
         }
         return;
     }
     else{
-        for(i = 0; i < net->topology[net->n_layers - depth]; i++){
-            a[i] += net->bias[i];
-            a[i] = net->hidden_activation_function(a[i]);
+        float a[DIM[0]];
+        for(i = 0; i < DIM[0]; i++){
+            a[i] = 0.0;
+            for(k = 0; k < DIM[1]; k++){
+                a[i] += weights[(DIM[1]*i)+k]*input[k];
+            }
+            a[i] = net->hidden_activation_function(a[i] + net->bias[i]);
         }
-        unsigned int weights_iter = (_currW[0]*_currW[1]);
-        FP_ANN(net, a, depth-1, &weights[weights_iter]);
+        FP_ANN(net, a, depth-1, &weights[DIM[0]*DIM[1]]);
     }
     return;
 }
@@ -170,7 +137,7 @@ void run_ann(ANN *net, float *input){
     FP_ANN(net, input, net->n_layers-1, net->weights);
 }
 
-void init_ann(ANN *net){ 
+void init_ann(ANN *net){
     #ifndef _EMBEDDED_
         fill_rand(net->weights, net->n_weights, 0.2, 0.8);
     #endif
@@ -183,7 +150,25 @@ void init_ann(ANN *net){
         else if(net->output_activation_function == &tanhf) net->output_activation_derivative = &tanhf_derivative;
         else if(net->output_activation_function == &sigmoid) net->output_activation_derivative = &sigmoid_derivative;
     #endif
-    
+
+    if(net->hidden_activation_function == &relu) net->hidden_activation_derivative = &relu_derivative;
+    else if(net->hidden_activation_function == &relu2) net->hidden_activation_derivative = &relu2_derivative;
+    #ifndef _EMBEDDED_
+        else if(net->hidden_activation_function == &tanhf) net->hidden_activation_derivative = &tanhf_derivative;
+        else if(net->hidden_activation_function == &sigmoid) net->hidden_activation_derivative = &sigmoid_derivative;
+    #endif
+}
+
+void init_embedded_ann(ANN *net){
+    fill_zeros(net->dedw, net->n_weights);
+
+    if(net->output_activation_function == &relu) net->output_activation_derivative = &relu_derivative;
+    else if(net->output_activation_function == &relu2) net->output_activation_derivative = &relu2_derivative;
+    #ifndef _EMBEDDED_
+        else if(net->output_activation_function == &tanhf) net->output_activation_derivative = &tanhf_derivative;
+        else if(net->output_activation_function == &sigmoid) net->output_activation_derivative = &sigmoid_derivative;
+    #endif
+
     if(net->hidden_activation_function == &relu) net->hidden_activation_derivative = &relu_derivative;
     else if(net->hidden_activation_function == &relu2) net->hidden_activation_derivative = &relu2_derivative;
     #ifndef _EMBEDDED_
@@ -241,7 +226,7 @@ void init_ann(ANN *net){
 
     void load_ann(ANN *net, const char *filename){
         FILE *infile;
-         
+
         infile = fopen (filename, "r");
         if (infile == NULL)
         {
@@ -284,23 +269,23 @@ void init_ann(ANN *net){
                     net->hidden_activation_function = &relu2;
                     i++;
                 }
-                else if(actfunc == 't'){ 
+                else if(actfunc == 't'){
                     net->hidden_activation_derivative = &tanhf_derivative;
                     net->hidden_activation_function = &tanhf;
                     i++;
                 }
-                else if(actfunc == 's'){ 
+                else if(actfunc == 's'){
                     net->hidden_activation_derivative = &sigmoid_derivative;
                     net->hidden_activation_function = &sigmoid;
                     i++;
                 }
-                else if(actfunc == 'u'){ 
+                else if(actfunc == 'u'){
                     printf("User Defined Activation Function\n");
                     i++;
                 }
             }
             else{
-                if(actfunc == 'r'){ 
+                if(actfunc == 'r'){
                     net->output_activation_derivative = &relu_derivative;
                     net->output_activation_function = &relu;
                     i++;
@@ -315,7 +300,7 @@ void init_ann(ANN *net){
                     net->output_activation_function = &sigmoid;
                     i++;
                 }
-                else if(actfunc == 'u'){ 
+                else if(actfunc == 'u'){
                     printf("User Defined Activation Function\n");
                     i++;
                 }
@@ -353,7 +338,7 @@ void fill_number(float *v, unsigned int size, float number){
 
 #ifndef _EMBEDDED_
     void softmax(unsigned int size, float multiplier, float *x, float *y){
-        int i; 
+        int i;
         float sum;
         for(i = 0; i < size; i++){
             sum += exp(x[i] * multiplier);
@@ -371,14 +356,14 @@ void fill_number(float *v, unsigned int size, float number){
             else sum += (x[i] * multiplier);
         }
         for(i = 0; i < size; i++){
-            y[i] = (x[i] * multiplier) / sum; 
+            y[i] = (x[i] * multiplier) / sum;
         }
     }
 #endif
 
-void weak_softmax(float *x, float *y) {
+void strong_softmax(float *x, float *y) {
     //For use with systems that have low-precision floating point number storage.
-    
+
     //NOTE: Adjust size as required, the low-precision requires the computation to be defined in a single line.
 
     //NOTE: The Designer program has a tool to format this function to other input sizes.
@@ -399,14 +384,14 @@ void weak_softmax(float *x, float *y) {
 //-----Activation Functions-----
 float relu(float x){
     if(x < 0.0) return 0.0;
-    else if(x > 1.0) return 1.0+x*0.1;
+    else if(x > 1.0) return 0.1*x+0.93;
     return x;
 }
 
 //Similar to Tanh
 float relu2(float x){
-    if(x < -1.0) return 0.1*x-0.9;
-    else if(x > 1.0) return 0.1*x+0.9;
+    if(x < -1.0)     return 0.1*x-0.93;
+    else if(x > 1.0) return 0.1*x+0.93;
     return x;
 }
 
