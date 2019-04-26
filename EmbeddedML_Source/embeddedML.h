@@ -1,4 +1,4 @@
-/* EMBEDDEDML V1.2 */
+/* EMBEDDEDML V1.2.1 */
 /*
     embeddedML.h - Embedded Machine Learning Library
     Copyright (C) 2018  Charles Zaloom
