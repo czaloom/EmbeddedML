@@ -1,4 +1,4 @@
-/* EMBEDDEDML V1.2 */
+/* EMBEDDEDML V1.2.1 */
 /*
     embeddedML.c - Embedded Machine Learning Library
     Copyright (C) 2018  Charles Zaloom
@@ -18,6 +18,10 @@
 */
 
 #include "embeddedML.h"
+
+//#ifndef _EMBEDDED_
+//	#define _EMBEDDED_
+//#endif
 
 //-----ANN-----
 void BP_ANN(ANN *net, float *input, float *output, float *weights, float *velocity, float *bias, float *delta, int depth){
@@ -127,7 +131,9 @@ void FP_ANN(ANN *net, float *input, unsigned int depth, float *weights){
                 a[i] += weights[(DIM[1]*i)+k]*input[k];
             }
             a[i] = net->hidden_activation_function(a[i] + net->bias[i]);
+            //if(depth == 2) printf("%f,", a[i]);
         }
+        //if(depth == 2) printf("0\n");
         FP_ANN(net, a, depth-1, &weights[DIM[0]*DIM[1]]);
     }
     return;
@@ -288,6 +294,11 @@ void init_embedded_ann(ANN *net){
                 if(actfunc == 'r'){
                     net->output_activation_derivative = &relu_derivative;
                     net->output_activation_function = &relu;
+                    i++;
+                }
+                else if(actfunc == 'R'){
+                    net->output_activation_derivative = &relu2_derivative;
+                    net->output_activation_function = &relu2;
                     i++;
                 }
                 else if(actfunc == 't'){
