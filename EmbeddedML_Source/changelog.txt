@@ -2,7 +2,7 @@
  * changelog.txt
  *
  * EmbeddedML
- * v1.2
+ * v1.2.1
  *
  * Embedded Machine Learning
  * Created by Charles Zaloom on 5/27/18.
@@ -11,20 +11,19 @@
 
 Changelog:
 	CORE:
-		Fixed: Mistake in RELU2 definition
-		
-		Change: Renamed 'weak_softmax' to 'strong_softmax'
-		Change: RELU now begins decreasing at 1.03 rather than 1.1
-		Change: 'ANN.output' now returns network output rather than error. Allows for user to define error calculation.
-
-		Addition: 'init_embedded_ann' --> Allows for a loaded ANN's bias and weights to not be modified.
-
-		Optimization: Cut out excess code in backprop and forwardprop. 
+		Fixed: Loading a network file that contains ReLU2 will now work properly.
 
 	DESIGNER:
-		Change: 'Load ANN' option now uses the 'init_loaded_ann' function
-		Change: 'Load ANN' option now declares "output" to replace "y" array
+		New: Added the ability to specify a model ID number.
+		Fixed: Deisgner Program no longer uses 'runerror' when describing model output.
 
 Notes:
+	- In the updated Designer program you can now set a model ID: 
 
+			-> ./designer -ID # 3 3 3
+			-> ./designer 3 3 3 -ID #
+		
+		where # represents the ID number and is any non-zero, postive integer.
+		The '3 3 3' is a arbitrarily chosen network topology.
+		
 Issues:
