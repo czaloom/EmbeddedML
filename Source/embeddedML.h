@@ -50,6 +50,16 @@ void run_ann(ANN *net, float *input);
 void init_ann(ANN *net);
 void init_pretrained_ann(ANN *net);
 
+void set_model_memory(ANN *model, float *weights, float *dedw, float *bias, float *output);
+void set_model_parameters(ANN *model, unsigned int *topology, unsigned int nlayers, char activation_function);
+void set_model_hyperparameters(ANN *model, float learning_rate, float bias_learning_rate, float momentum_factor);
+
+void set_learning_rate(ANN *model, float eta);
+void set_bias_learning_rate(ANN *model, float beta);
+void set_momentum_factor(ANN *model, float alpha);
+void set_output_actfunc(ANN *model, char func);
+void set_hidden_actfunc(ANN *model, char func);
+
 //-----Utility-----
 void fill_zeros(float *v, unsigned int size);
 void fill_number(float *v, unsigned int size, float number);

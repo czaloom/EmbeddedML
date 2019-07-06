@@ -1,5 +1,7 @@
 /* 
  * EMBEDDEDML v1.3b
+ * Lightweight Version
+ * - Optimized for resource constrained platforms.
  */
 
 /*
@@ -197,4 +199,119 @@ float relu2_derivative(float x){
     if(x < -1.0) return 0.1;
     else if(x > 1.0) return 0.1;
     return 1.0;
+}
+
+//----Wrapper Functions-----
+
+void set_model_memory(ANN *model, float *weights, float *dedw, float *bias, float *output){
+    model->weights = weights;
+    model->dedw = dedw;
+    model->bias = bias;
+    model->output = output;
+}
+
+void set_model_parameters(ANN *model, unsigned int *topology, unsigned int nlayers, char activation_function){
+    model->topology = topology;
+    model->n_layers = nlayers;
+
+    int i;
+    int nweights = 0, nbias = 0;
+    for(i = 1; i < nlayers; i++){
+        nweights += topology[i]*topology[i-1];
+        nbias += topology[i-1];
+    }
+
+    model->n_weights = nweights;
+    model->n_bias = nbias;
+
+    switch(activation_function){
+        case 'r':
+            model->output_activation_function = &relu;
+            model->hidden_activation_function = &relu;
+            break;
+        case 'R':
+            model->output_activation_function = &relu2;
+            model->hidden_activation_function = &relu2;
+            break;
+        case 's':
+            model->output_activation_function = &sigmoid;
+            model->hidden_activation_function = &sigmoid;
+            break;
+        case 't':
+            model->output_activation_function = &tanhf;
+            model->hidden_activation_function = &tanhf;
+            break;
+        default:
+            model->output_activation_function = &relu;
+            model->hidden_activation_function = &relu;
+            break;
+    }
+}
+
+void set_model_hyperparameters(ANN *model, float learning_rate, float bias_learning_rate, float momentum_factor){
+    model->eta = learning_rate;
+    model->beta = bias_learning_rate;
+    model->alpha = momentum_factor;
+}
+
+void set_learning_rate(ANN *model, float eta){
+    model->eta = eta;
+}
+
+void set_bias_learning_rate(ANN *model, float beta){
+    model->beta = beta;
+}
+
+void set_momentum_factor(ANN *model, float alpha){
+    model->alpha = alpha;
+}
+
+void set_output_actfunc(ANN *model, char func){
+    switch(func){
+        case 'r':
+            model->output_activation_function = &relu;
+            model->output_activation_derivative = &relu_derivative;
+            break;
+        case 'R':
+            model->output_activation_function = &relu2;
+            model->output_activation_derivative = &relu2_derivative;
+            break;
+        case 's':
+            model->output_activation_function = &sigmoid;
+            model->output_activation_derivative = &sigmoid_derivative;
+            break;
+        case 't':
+            model->output_activation_function = &tanhf;
+            model->output_activation_derivative = &tanhf_derivative;
+            break;
+        default:
+            model->output_activation_function = &relu;
+            model->output_activation_derivative = &relu_derivative;
+            break;
+    }
+}
+
+void set_hidden_actfunc(ANN *model, char func){
+    switch(func){
+        case 'r':
+            model->hidden_activation_function = &relu;
+            model->hidden_activation_derivative = &relu_derivative;
+            break;
+        case 'R':
+            model->hidden_activation_function = &relu2;
+            model->hidden_activation_derivative = &relu2_derivative;
+            break;
+        case 's':
+            model->hidden_activation_function = &sigmoid;
+            model->hidden_activation_derivative = &sigmoid_derivative;
+            break;
+        case 't':
+            model->hidden_activation_function = &tanhf;
+            model->hidden_activation_derivative = &tanhf_derivative;
+            break;
+        default:
+            model->hidden_activation_function = &relu;
+            model->hidden_activation_derivative = &relu_derivative;
+            break;
+    }
 }
