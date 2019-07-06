@@ -2,28 +2,21 @@
  * changelog.txt
  *
  * EmbeddedML
- * v1.2.1
+ * v1.3b
  *
  * Embedded Machine Learning
  * Created by Charles Zaloom on 5/27/18.
  *
- */
+ */ 
 
 Changelog:
 	CORE:
-		Fixed: Loading a network file that contains ReLU2 will now work properly.
+		- 'b' version removes functions that cannot be run on sensortile or other limited platforms.
 
 	DESIGNER:
-		New: Added the ability to specify a model ID number.
-		Fixed: Deisgner Program no longer uses 'runerror' when describing model output.
+		
 
 Notes:
-	- In the updated Designer program you can now set a model ID: 
-
-			-> ./designer -ID # 3 3 3
-			-> ./designer 3 3 3 -ID #
-		
-		where # represents the ID number and is any non-zero, postive integer.
-		The '3 3 3' is a arbitrarily chosen network topology.
+	- Forking the library to allow for specialization. For the time being the 'b' designation means that it is the optimized/stripped-down version of the source.
 		
 Issues:
