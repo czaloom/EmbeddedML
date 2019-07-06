@@ -2,7 +2,7 @@
  * xor_and_example.c
  *
  * EmbeddedML
- * v1.0
+ * v1.3
  *
  * Embedded Machine Learning
  * Created by Charles Zaloom on 5/27/18.
@@ -29,29 +29,20 @@ clock_t start, end;
 double cpu_time_used;
 
 int main(int argc, const char * argv[]) {
-    //---NETWORK_BUILDER---
-    float weights[15];
+    
+    // ------- ANN -------
+    float weights[15] = {0.680700,0.324900,0.607300,0.365800,0.693000,0.527200,0.754400,0.287800,0.592300,0.570900,0.644000,0.416500,0.249200,0.704200,0.598700};
     float dedw[15];
     float bias[5];
     unsigned int ANN_topology[3] = {3,3,2};
-    float error[2];
+    float output[2];
+
     ANN net;
-    net.weights = weights;
-    net.dedw = dedw;
-    net.bias = bias;
-    net.topology = ANN_topology;
-    net.n_layers = 3;
-    net.n_weights = 15;
-    net.n_bias = 5;
-    net.output = error;
-
-    //OPTIONS
-    net.eta = 0.13;     //Learning Rate
-    net.alpha = 0.25;   //Momentum Coefficient
-    net.output_activation_function = &relu;
-    net.hidden_activation_function = &relu;
-
+    set_model_memory(&net, weights, dedw, bias, output);
+    set_model_parameters(&net, ANN_topology, 3, 'r');
+    set_model_hyperparameters(&net, 0.13, 0.01, 0.25);
     init_ann(&net);
+
     float x[3];
     float y[2];
     //---------------------
@@ -60,7 +51,7 @@ int main(int argc, const char * argv[]) {
     
     //TRAINING CYCLES
     unsigned int i;
-    for(i = 0; i < 1000; i++){
+    for(i = 0; i < 2000; i++){
         generate_xorand(x, y);
         train_ann(&net, x, y);
     }
@@ -68,7 +59,6 @@ int main(int argc, const char * argv[]) {
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf("\nTime used: %f\n", cpu_time_used);
-    printf("Error: %f\n\n", net.output[0]);
 
     //TEST SAMPLES
     float x0[3] = {0,0,0};  // output 0 0 

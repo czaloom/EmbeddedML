@@ -2,7 +2,7 @@
  * xor_example.c
  *
  * EmbeddedML
- * v1.0
+ * v1.3
  *
  * Embedded Machine Learning
  * Created by Charles Zaloom on 5/27/18.
@@ -26,29 +26,18 @@ void printOutput_ANN( ANN *net ){
 
 int main(int argc, const char * argv[]) {
     //---ANN---
-    float weights[6];
+    float weights[6] = {0.680700,0.324900,0.607300,0.365800,0.693000,0.527200};
     float dedw[6];
     float bias[3];
     unsigned int network_topology[3] = {2,2,1};
-    float run_error[1];
+    float output[1];
 
     ANN net;
-    net.weights = weights;
-    net.dedw = dedw;
-    net.bias = bias;
-    net.topology = network_topology;
-    net.n_layers = 3;
-    net.n_weights = 6;
-    net.n_bias = 3;
-    net.output = run_error;
-
-    //OPTIONS
-    net.eta = 0.13;     //Learning Rate
-    net.alpha = 0.25;   //Momentum Coefficient
-    net.output_activation_function = &relu;
-    net.hidden_activation_function = &relu;
-
+    set_model_memory(&net, weights, dedw, bias, output);
+    set_model_parameters(&net, network_topology, 3, 'r');
+    set_model_hyperparameters(&net, 0.13, 0.01, 0.25);
     init_ann(&net);
+    
     float x[2];
     float y[1];
     //---------------------
