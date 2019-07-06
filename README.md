@@ -10,7 +10,7 @@
   	* XOR 
   	* XOR-AND 
 
-### SENSORTILE
+### STMicroelectronic SENSORTILE
   - Learning Orientation Based on Accelerometer Data
       * [Video](https://youtu.be/phoKZ6RlKD0) of performance on STM's SensorTile 
   - Learning the XOR-AND Gate
