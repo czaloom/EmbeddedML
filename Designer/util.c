@@ -148,9 +148,9 @@ int generate_model(int argc, const char * argv[], int n_layers, int begin, int e
     while(loop == 1){
     	clrscr();
 		int i;
-	    const char *a[4] = {"New Model","New Model without Wrapper","New Optimized Model","Load Model"};
+	    const char *a[2] = {"New Model","New Model without Wrapper"};
 	    printf("Options:\n");
-	    for(i = 0; i < 4; i++){
+	    for(i = 0; i < 2; i++){
 	    	printf("(%d) %s\n",i,a[i]);
 	    }
 	    printf("Input: ");
@@ -161,7 +161,13 @@ int generate_model(int argc, const char * argv[], int n_layers, int begin, int e
 	    	case '0':
 	    		if(model_ID != 0){
 		    		printf("//--- ANN ID:%d ---\n",model_ID);
-					printf("float weights%d[%d];\n",model_ID,n_weights);
+					printf("float weights%d[%d] = {", model_ID, n_weights);
+					int k;
+				    for(k = 0; k < n_weights; k++){
+				    	printf("%f", W[k]);
+				    	if(k+1 < n_weights) printf(",");
+				    }
+				    printf("};\n");
 					printf("float dedw%d[%d];\n",model_ID,n_weights);
 					printf("float bias%d[%d];\n",model_ID,n_bias);
 					printf("unsigned int topology%d[%d] = {",model_ID, n_layers);
@@ -173,7 +179,6 @@ int generate_model(int argc, const char * argv[], int n_layers, int begin, int e
 					printf("float output%d[%s];\n",model_ID,argv[n_layers+begin]);
 
 					printf("\nANN net%d;\n", model_ID);
-					printf("\n");
 
 					printf("init_ann_memory(&net%d, weights%d, dedw%d, bias%d, output%d);\n",model_ID,model_ID,model_ID,model_ID,model_ID);
     				printf("init_ann_parameters(&net%d, topology%d, %d, 'r');\n",model_ID,model_ID,n_layers);
@@ -186,7 +191,13 @@ int generate_model(int argc, const char * argv[], int n_layers, int begin, int e
 				}
 				else{
 					printf("//--- ANN ---\n");
-					printf("float weights[%d];\n",n_weights);
+					printf("float weights[%d] = {", n_weights);
+					int k;
+				    for(k = 0; k < n_weights; k++){
+				    	printf("%f", W[k]);
+				    	if(k+1 < n_weights) printf(",");
+				    }
+				    printf("};\n");
 					printf("float dedw[%d];\n",n_weights);
 					printf("float bias[%d];\n",n_bias);
 					printf("unsigned int network_topology[%d] = {", n_layers);
@@ -198,7 +209,6 @@ int generate_model(int argc, const char * argv[], int n_layers, int begin, int e
 					printf("float output[%s];\n",argv[n_layers+begin]);
 
 					printf("\nANN net;\n");
-					printf("\n");
 
 					printf("init_ann_memory(&net, weights, dedw, bias, output);\n");
     				printf("init_ann_parameters(&net, ANN_topology, %d, 'r');\n",n_layers);
@@ -210,77 +220,7 @@ int generate_model(int argc, const char * argv[], int n_layers, int begin, int e
 					printf("//---------------------\n");
 				}
 				break;
-	    	case '1':
-	    		if(model_ID != 0){
-		    		printf("//--- ANN ID:%d ---\n",model_ID);
-					printf("float weights%d[%d];\n",model_ID,n_weights);
-					printf("float dedw%d[%d];\n",model_ID,n_weights);
-					printf("float bias%d[%d];\n",model_ID,n_bias);
-					printf("unsigned int network_topology%d[%d] = {",model_ID, n_layers);
-					for(i = 0; i < n_layers; i++){
-					    printf("%s", argv[i+1+begin]);
-					    if(i+1 != n_layers) printf(",");
-					}
-					printf("};\n");
-					printf("float output%d[%s];\n",model_ID,argv[n_layers+begin]);
-
-					printf("\nANN net%d;\n", model_ID);
-					printf("net%d.weights = weights%d;\n", model_ID, model_ID);
-					printf("net%d.dedw = dedw%d;\n", model_ID, model_ID);
-					printf("net%d.bias = bias%d;\n", model_ID, model_ID);
-					printf("net%d.topology = network_topology%d;\n", model_ID, model_ID);
-					printf("net%d.n_layers = %d;\n", model_ID, n_layers);
-					printf("net%d.n_weights = %d;\n", model_ID, n_weights);
-					printf("net%d.n_bias = %d;\n", model_ID, n_bias);
-					printf("net%d.output = output%d;\n\n", model_ID, model_ID);
-
-					printf("//OPTIONS\n");
-					printf("net%d.eta = 0.25;     //Learning Rate\n", model_ID);
-					printf("net%d.alpha = 0.15;   //Momentum Coefficient\n", model_ID);
-					printf("net%d.output_activation_function = &relu;\n", model_ID);
-					printf("net%d.hidden_activation_function = &relu;\n", model_ID);
-
-					printf("\ninit_ann(&net%d);\n", model_ID);
-					printf("float x%d[%s];\n", model_ID, argv[begin+1]);
-					printf("float y%d[%s];\n", model_ID, argv[n_layers+begin]);
-					printf("//---------------------\n");
-				}
-				else{
-					printf("//---ANN---\n");
-					printf("float weights[%d];\n", n_weights);
-					printf("float dedw[%d];\n", n_weights);
-					printf("float bias[%d];\n", n_bias);
-					printf("unsigned int network_topology[%d] = {", n_layers);
-					for(i = 0; i < n_layers; i++){
-					    printf("%s", argv[i+1+begin]);
-					    if(i+1 != n_layers) printf(",");
-					}
-					printf("};\n");
-					printf("float output[%s];\n", argv[n_layers+begin]);
-
-					printf("\nANN net;\n");
-					printf("net.weights = weights;\n");
-					printf("net.dedw = dedw;\n");
-					printf("net.bias = bias;\n");
-					printf("net.topology = network_topology;\n");
-					printf("net.n_layers = %d;\n", n_layers);
-					printf("net.n_weights = %d;\n", n_weights);
-					printf("net.n_bias = %d;\n", n_bias);
-					printf("net.output = output;\n\n");
-
-					printf("//OPTIONS\n");
-					printf("net.eta = 0.25;     //Learning Rate\n");
-					printf("net.alpha = 0.15;   //Momentum Coefficient\n");
-					printf("net.output_activation_function = &relu;\n");
-					printf("net.hidden_activation_function = &relu;\n");
-
-					printf("\ninit_ann(&net);\n");
-					printf("float x[%s];\n", argv[begin+1]);
-					printf("float y[%s];\n", argv[n_layers+begin]);
-					printf("//---------------------\n");
-				}
-	    		break;
-    		case '2':
+    		case '1':
     			if(model_ID != 0){
     				printf("//--- OPTIMIZED ANN ID:%d ---\n", model_ID);
 					printf("float weights%d[%d] = {", model_ID, n_weights);
@@ -363,25 +303,6 @@ int generate_model(int argc, const char * argv[], int n_layers, int begin, int e
 					printf("//---------------------\n");
 		    		break;
 	    		}
-			case '3':
-				printf("//---LOAD ANN FROM FILE---\n");
-			    printf("float weights[%d];\n", n_weights);
-			    printf("float dedw[%d];\n", n_weights);
-			    printf("float bias[%d];\n", n_bias);
-			    printf("unsigned int topology[%d];\n", n_layers);
-			    printf("float output[%s];\n", argv[n_layers+begin]);
-
-			    printf("\nANN net;\n");
-			    printf("net.weights = weights;\n");
-			    printf("net.dedw = dedw;\n");
-			    printf("net.bias = bias;\n");
-			    printf("net.topology = topology;\n");
-			    printf("net.output = output;\n");
-			    printf("load_ann(&net, <Filename>);\n");
-			    printf("float x[%d];\n", atoi(argv[begin+1]));
-			    printf("float y[%s];\n", argv[n_layers+begin]);
-			    printf("//-------------\n");
-	    		break;
 			default:
 				printf("UNKOWN INPUT\n");
 				break;
