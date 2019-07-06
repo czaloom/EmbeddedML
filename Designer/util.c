@@ -222,7 +222,7 @@ int generate_model(int argc, const char * argv[], int n_layers, int begin, int e
 				break;
     		case '1':
     			if(model_ID != 0){
-    				printf("//--- OPTIMIZED ANN ID:%d ---\n", model_ID);
+    				printf("//--- ANN ID:%d ---\n", model_ID);
 					printf("float weights%d[%d] = {", model_ID, n_weights);
 					int k;
 				    for(k = 0; k < n_weights; k++){
@@ -263,7 +263,7 @@ int generate_model(int argc, const char * argv[], int n_layers, int begin, int e
 		    		break;
     			}
     			else{
-	   	    		printf("//---EMBEDDED ANN---\n");
+	   	    		printf("//--- ANN ---\n");
 					printf("float weights[%d] = {", n_weights);
 					int k;
 				    for(k = 0; k < n_weights; k++){
