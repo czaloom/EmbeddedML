@@ -1,7 +1,5 @@
 /* 
  * EMBEDDEDML v1.3b
- * Lightweight Version
- * - Optimized for resource constrained platforms.
  */
 
 /*
@@ -276,14 +274,6 @@ void set_output_actfunc(ANN *model, char func){
             model->output_activation_function = &relu2;
             model->output_activation_derivative = &relu2_derivative;
             break;
-        case 's':
-            model->output_activation_function = &sigmoid;
-            model->output_activation_derivative = &sigmoid_derivative;
-            break;
-        case 't':
-            model->output_activation_function = &tanhf;
-            model->output_activation_derivative = &tanhf_derivative;
-            break;
         default:
             model->output_activation_function = &relu;
             model->output_activation_derivative = &relu_derivative;
@@ -300,14 +290,6 @@ void set_hidden_actfunc(ANN *model, char func){
         case 'R':
             model->hidden_activation_function = &relu2;
             model->hidden_activation_derivative = &relu2_derivative;
-            break;
-        case 's':
-            model->hidden_activation_function = &sigmoid;
-            model->hidden_activation_derivative = &sigmoid_derivative;
-            break;
-        case 't':
-            model->hidden_activation_function = &tanhf;
-            model->hidden_activation_derivative = &tanhf_derivative;
             break;
         default:
             model->hidden_activation_function = &relu;

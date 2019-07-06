@@ -1,6 +1,6 @@
-/* EMBEDDEDML V1.2.1 */
+/* EMBEDDEDML V1.3 */
 /*
-    designer.c - Tools for quicker development in EmbeddedML 
+    util.c - Code generation for EmbeddedML 
     Copyright (C) 2018 Charles Zaloom
 
     EmbeddedML is free software: you can redistribute it and/or modify
@@ -17,17 +17,15 @@
     along with EmbeddedML.  If not, see <https://www.gnu.org/licenses/>
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "embeddedML.h"
+#include "util.h"
 
-unsigned int model_ID = 0;
-
-unsigned int n_layers = 0;
-unsigned int n_weights = 0, n_bias = 0;
-
-unsigned int begin,end;
+void fill_rand(float *v, unsigned int size, float lower, float upper){
+    int i;
+    int up = ((upper - lower)*10000.0);
+    for(i = 0; i < size; i++){
+        v[i] = ((rand()%up)/10000.0)+lower;
+    }
+}
 
 void clrscr(){
 	system("clear||cls");
@@ -88,7 +86,7 @@ int check_if_continue(int path){
     return 0;
 }
 
-int generate_weights(int argc, const char * argv[]){
+int generate_weights(int argc, const char * argv[], int n_weights){
 	clrscr();
     unsigned i;
 
@@ -96,7 +94,7 @@ int generate_weights(int argc, const char * argv[]){
     fill_rand(W, n_weights, 0.2, 0.8);
 
     printf("-----GENERATED WEIGHTS-----\n");
-    printf("Note: Generating weights is only necessary when _EMBEDDED is defined.\n\n");
+    printf("Note: Generating weights is only necessary when the platform does not support generating randomized numbers.\n\n");
     printf("float weights[%d] = {", n_weights);
     int k;
     for(k = 0; k < n_weights; k++){
@@ -107,7 +105,7 @@ int generate_weights(int argc, const char * argv[]){
     return 1;
 }
 
-int generate_softmax(int argc, const char * argv[]){
+int generate_softmax(int argc, const char * argv[], int begin){
 	clrscr();
     int size = atoi(argv[begin+1]);
 
@@ -140,7 +138,7 @@ int generate_softmax(int argc, const char * argv[]){
     return 1;
 }
 
-int generate_model(int argc, const char * argv[]){
+int generate_model(int argc, const char * argv[], int n_layers, int begin, int end, int model_ID, int n_bias, int n_weights){
 	clrscr();
     unsigned i;
     float W[n_weights];
@@ -150,9 +148,9 @@ int generate_model(int argc, const char * argv[]){
     while(loop == 1){
     	clrscr();
 		int i;
-	    const char *a[3] = {"New","New Embedded","Load"};
+	    const char *a[4] = {"New Model","New Model without Wrapper","New Optimized Model","Load Model"};
 	    printf("Options:\n");
-	    for(i = 0; i < 3; i++){
+	    for(i = 0; i < 4; i++){
 	    	printf("(%d) %s\n",i,a[i]);
 	    }
 	    printf("Input: ");
@@ -161,6 +159,58 @@ int generate_model(int argc, const char * argv[]){
 	    clrscr();
 	    switch(input[0]){
 	    	case '0':
+	    		if(model_ID != 0){
+		    		printf("//--- ANN ID:%d ---\n",model_ID);
+					printf("float weights%d[%d];\n",model_ID,n_weights);
+					printf("float dedw%d[%d];\n",model_ID,n_weights);
+					printf("float bias%d[%d];\n",model_ID,n_bias);
+					printf("unsigned int topology%d[%d] = {",model_ID, n_layers);
+					for(i = 0; i < n_layers; i++){
+					    printf("%s", argv[i+1+begin]);
+					    if(i+1 != n_layers) printf(",");
+					}
+					printf("};\n");
+					printf("float output%d[%s];\n",model_ID,argv[n_layers+begin]);
+
+					printf("\nANN net%d;\n", model_ID);
+					printf("\n");
+
+					printf("init_ann_memory(&net%d, weights%d, dedw%d, bias%d, output%d);\n",model_ID,model_ID,model_ID,model_ID,model_ID);
+    				printf("init_ann_parameters(&net%d, topology%d, %d, 'r');\n",model_ID,model_ID,n_layers);
+    				printf("init_ann_hyperparameters(&net%d, 0.13, 0.01, 0.25);\n",model_ID);
+					printf("init_ann(&net%d);\n", model_ID);
+
+					printf("\nfloat x%d[%s];\n", model_ID, argv[begin+1]);
+					printf("float y%d[%s];\n", model_ID, argv[n_layers+begin]);
+					printf("//---------------------\n");
+				}
+				else{
+					printf("//--- ANN ---\n");
+					printf("float weights[%d];\n",n_weights);
+					printf("float dedw[%d];\n",n_weights);
+					printf("float bias[%d];\n",n_bias);
+					printf("unsigned int network_topology[%d] = {", n_layers);
+					for(i = 0; i < n_layers; i++){
+					    printf("%s", argv[i+1+begin]);
+					    if(i+1 != n_layers) printf(",");
+					}
+					printf("};\n");
+					printf("float output[%s];\n",argv[n_layers+begin]);
+
+					printf("\nANN net;\n");
+					printf("\n");
+
+					printf("init_ann_memory(&net, weights, dedw, bias, output);\n");
+    				printf("init_ann_parameters(&net, ANN_topology, %d, 'r');\n",n_layers);
+    				printf("init_ann_hyperparameters(&net, 0.13, 0.01, 0.25);\n");
+					printf("init_ann(&net);\n");
+
+					printf("\nfloat x[%s];\n", argv[begin+1]);
+					printf("float y[%s];\n", argv[n_layers+begin]);
+					printf("//---------------------\n");
+				}
+				break;
+	    	case '1':
 	    		if(model_ID != 0){
 		    		printf("//--- ANN ID:%d ---\n",model_ID);
 					printf("float weights%d[%d];\n",model_ID,n_weights);
@@ -230,9 +280,9 @@ int generate_model(int argc, const char * argv[]){
 					printf("//---------------------\n");
 				}
 	    		break;
-    		case '1':
+    		case '2':
     			if(model_ID != 0){
-    				printf("//--- EMBEDDED ANN ID:%d ---\n", model_ID);
+    				printf("//--- OPTIMIZED ANN ID:%d ---\n", model_ID);
 					printf("float weights%d[%d] = {", model_ID, n_weights);
 					int k;
 				    for(k = 0; k < n_weights; k++){
@@ -266,7 +316,7 @@ int generate_model(int argc, const char * argv[]){
 					printf("net%d.output_activation_function = &relu;\n",model_ID);
 					printf("net%d.hidden_activation_function = &relu;\n",model_ID);
 
-					printf("\ninit_embedded_ann(&net%d);\n",model_ID);
+					printf("\ninit_ann(&net%d);\n",model_ID);
 					printf("float x%d[%s];\n",model_ID, argv[begin+1]);
 					printf("float y%d[%s];\n",model_ID, argv[n_layers+begin]);
 					printf("//---------------------\n");
@@ -313,7 +363,7 @@ int generate_model(int argc, const char * argv[]){
 					printf("//---------------------\n");
 		    		break;
 	    		}
-			case '2':
+			case '3':
 				printf("//---LOAD ANN FROM FILE---\n");
 			    printf("float weights[%d];\n", n_weights);
 			    printf("float dedw[%d];\n", n_weights);
@@ -340,73 +390,4 @@ int generate_model(int argc, const char * argv[]){
 	 	loop = check_if_continue(1);
   	}
     return 1;
-}
-
-int main(int argc, const char * argv[]) {
-	printf("%d\n", argc);
-	if(argc == 1) help_screen();
-
-	else{
-		unsigned i;
-	    n_layers = argc - 1;
-	    n_weights = 0; 
-	    n_bias = 0;
-	    int id_state = 0;
-	    for(i = 0; i < n_layers; i++){
-	    	if(strcmp(argv[i+1], "-ID") == 0){
-	    		//if(i + 2 == n_layers - 1) 
-	   
-	    		model_ID = atoi(argv[i+2]); 
-	    		if(i == 0){
-	    			begin = i+2;
-	    			end = n_layers;
-	    		}
-	    		else{
-	    			begin = 0;
-	    			end = n_layers-2;
-	    		}
-	    		i+=2;
-
-	    		id_state = 1;
-	    	}
-	    	else if(i > 0){
-	        	n_weights += atoi(argv[i+1])*atoi(argv[i]);
-	        	n_bias += atoi(argv[i+1]);
-	    	}
-	    }
-	    if(id_state) n_layers -= 2;
-
-		clrscr();
-		int loop = 1;
-		while(loop == 1){
-			int i;
-		    const char *a[4] = {"Create/Load ANN", "Weight Generator", "Strong_Softmax Generator"};
-		    printf("Tools:\n");
-
-		    int tools = 3;
-		    for(i = 0; i < tools; i++){
-		    	printf("(%d) %s\n",i,a[i]);
-		    }
-
-		    printf("Input: ");
-		    char input[5];
-		    fgets(input,5,stdin);
-		    switch(input[0]){
-		    	case '0':
-		    		generate_model(argc,argv);
-		    		break;
-	    		case '1':
-	    			generate_weights(argc, argv);
-	    			break;
-    			case '2':
-    				generate_softmax(argc, argv);
-    				break;
-				default:
-					printf("UNKOWN INPUT\n");
-					break;
-		    }
-		 	loop = check_if_continue(0);
-	  	}
-  	}
-    return 0;
 }
