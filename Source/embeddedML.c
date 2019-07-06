@@ -231,14 +231,6 @@ void set_model_parameters(ANN *model, unsigned int *topology, unsigned int nlaye
             model->output_activation_function = &relu2;
             model->hidden_activation_function = &relu2;
             break;
-        case 's':
-            model->output_activation_function = &sigmoid;
-            model->hidden_activation_function = &sigmoid;
-            break;
-        case 't':
-            model->output_activation_function = &tanhf;
-            model->hidden_activation_function = &tanhf;
-            break;
         default:
             model->output_activation_function = &relu;
             model->hidden_activation_function = &relu;
