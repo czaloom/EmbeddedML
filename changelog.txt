@@ -12,9 +12,10 @@
 Changelog:
 	CORE:
 		- 'b' version removes functions that cannot be run on sensortile or other limited platforms.
+		- Added functions to simplifiy model initialization
 
 	DESIGNER:
-		
+		- Updated for new model init
 
 Notes:
 	- Forking the library to allow for specialization. For the time being the 'b' designation means that it is the optimized/stripped-down version of the source.
