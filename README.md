@@ -19,14 +19,8 @@ For those experienced with SensorTile and the STMicroelectronics Datalog project
 
 The examples are complete EmbeddedML applications demonstrating training and testing EmbeddedML operation.
 
-Now, for those **learning about SensorTile** please see this information below on this wireless sensor IoT platform:
+Now, for those **learning about SensorTile** please see the information below:
 
 SensorTile: https://www.st.com/en/evaluation-tools/steval-stlkt01v1.html
 
-Tutorials for getting started on this platform (along with using EmbeddedML) can be found at https://sites.google.com/view/ucla-stmicroelectronics-iot/home courtesy of Dr. Kaiser and UCLA's ECE program.
-
-Then, there are Tutorials you may follow below that will prepare you for this introduction to Embedded ML. These can be found in the SensorTile Tutorials folder.
-
-Then, follow Tutorials 1,2,3 and 5.
-
-These will allow you to run the SensorTile Examples.
+Tutorials to get started on this platform (along with using EmbeddedML) can be found at https://sites.google.com/view/ucla-stmicroelectronics-iot/home courtesy of Dr. Kaiser and UCLA's ECE program. These are also provided in the SensorTile Tutorials folder.
