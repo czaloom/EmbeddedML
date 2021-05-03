@@ -1,7 +1,9 @@
 # EmbeddedML
 ### A Neural Network Library for Embedded "Edge" Devices
 
-**EmbeddedML** was created to be an alternative to the limited options available for Artificial Neural Networks in C. It is meant to support students design learning capabable "edge" devices. The library is built to be expandable and straightforward to manipulate.
+**EmbeddedML** enables embedded systems to directly learn to recognize events that are detected and classified by an EmbeddedML Neural Network. This provides embedded systems with machine learning capability operating entirely independently of other computing resources for both Neural Network training and execution.
+
+EmbeddedML was created to be an alternative to the limited options available for Artificial Neural Networks in C. It is meant to support students design learning capabable "edge" devices. The library is built to be expandable and straightforward to manipulate.
   
 ## EXAMPLES
 
